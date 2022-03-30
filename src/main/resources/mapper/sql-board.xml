@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+	<!-- 매퍼의 네임스페이스를 지정합니다.
+	매퍼와 XML의 쿼리를 매칭해서 사용하려면 매퍼 인터페이스의 경로와 메서드의 이름과
+	쿼리의 이름이 같아야 합니다.
+	즉 BoardMapper 인터페이스에 있는 selectBoardList에서 selectBoardList라는 이름의 쿼리와 매핑하기 위해서는 
+	그 전체 경로인 board.board.mapper.BoardMapper.selectBoardList가 필요합니다.
+	쿼리의 아이디를 지정할 때 각각의 쿼리에 전체 경로를 일일이 명시하는 것은 중복된 작업입니다.
+	네임스페이스에서 공톡적으로 사용되는 경로를 지정해서 네임스페이스와 쿼리 아이디가 합쳐져서 호출되게끔 합니다.-->
+	<mapper namespace="board.board.mapper.BoardMapper">
+	<!-- 리스트 조회 -->
+	<select id="selectBoardList" resultType="board.board.dto.BoardDto">
+		<![CDATA[
+			SELECT
+				board_idx,
+				title,
+				hit_cnt,
+				created_datetime
+			FROM
+				t_board
+			WHERE
+				deleted_yn = 'N'
+			ORDER BY board_idx DESC
+				]]>
+		   </select>
+		<!-- 등록 -->
+		
+		<insert id="insertBoard" parameterType="board.board.dto.BoardDto">
+		<![CDATA[
+		INSERT INTO t_board
+		(
+			title,contents,created_datetime,creator_id	
+		)
+		VALUES
+		(
+			#{title},
+			#{contents},
+			NOW(),
+			'admin'
+			)
+			
+			
+		]]>
+		</insert>
+		<!-- 조회수 쿼리 -->
+		<update id="updateHitCount" parameterType="int">
+		<![CDATA[
+			UPDATE
+				t_board
+			SET
+			    hit_cnt = hit_cnt +1
+			WHERE
+				board_idx = #{boardIdx}
+				]]>
+		</update>
+		<!-- 글 상세보기 쿼리 -->
+		<select id ="selectBoardDetail" parameterType="int"
+			resultType="board.board.dto.BoardDto">
+			<![CDATA[
+				SELECT
+					board_idx,title,contents,hit_cnt,
+					created_datetime,
+					creator_id
+				FROM
+					t_board
+				WHERE
+					board_idx=#{boardIdx} AND deleted_yn='N'
+					]]>
+		</select>
+						
+			<!-- 글 수정하기 쿼리 -->			
+		<update id ="updateBoard" parameterType="board.board.dto.BoardDto">
+			<![CDATA[
+				UPDATE t_board SET
+				title = #{title},
+				contents =#{contents},
+				updated_datetime=NOW(),
+				updated_id = 'admin'
+			WHERE
+				board_idx =#{boardIdx}
+				]]>				
+		</update>
+		<!-- 글 삭제 쿼리문 -->
+		<update id="deleteBoard" parameterType="board.board.dto.BoardDto">
+		<![CDATA[
+		UPDATE t_board SET
+		deleted_yn ='Y',
+		updated_datetime =NOW(),
+		updated_id = 'admin'
+		WHERE
+		 	board_idx=#{boardIdx}
+		]]>
+		</update>
+		</mapper>
